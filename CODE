@@ -1,0 +1,66 @@
+# CODE: model_serving_api.py
+
+from fastapi import FastAPI
+import pandas as pd
+import joblib # Used to load the pre-trained ML model
+
+# --- 1. SETUP ---
+# Initialize FastAPI application
+app = FastAPI(title="Real-Time Credit Risk Assessment API")
+
+# Load the pre-trained model and feature columns
+# NOTE: In a real system, the model is trained offline/batch on Alternative Data
+try:
+    MODEL = joblib.load("credit_risk_model.joblib")
+    # Define the required feature list (e.g., from feature engineering)
+    # The feature list is a mix of traditional and alternative data features.
+    FEATURE_COLUMNS = [
+        "income_stability_90d",   # Alt Data: Derived from transaction data
+        "util_bill_on_time_ratio",# Alt Data: Derived from utility payment data
+        "credit_score_traditional",
+        "loan_amount",
+        "age"
+    ]
+except FileNotFoundError:
+    print("FATAL ERROR: Model file not found. API cannot start.")
+    MODEL = None
+
+# --- 2. INPUT DATA MODEL ---
+# Define the structure for the input data in the API request
+class ApplicantData(BaseModel):
+    income_stability_90d: float
+    util_bill_on_time_ratio: float
+    credit_score_traditional: int
+    loan_amount: float
+    age: int
+
+# --- 3. REAL-TIME PREDICTION ENDPOINT ---
+@app.post("/assess-risk/")
+def assess_credit_risk(data: ApplicantData):
+    """
+    Accepts applicant features, returns real-time Probability of Default (PD) and decision.
+    """
+    if MODEL is None:
+        return {"error": "Model not available"}, 500
+
+    # Convert the input data into a Pandas DataFrame for the model
+    # Ensure features are in the exact order the model was trained on
+    input_df = pd.DataFrame([data.dict()])
+    input_data_for_model = input_df[FEATURE_COLUMNS]
+
+    # Predict the probability of default (PD)
+    # model.predict_proba returns [[Prob_NonDefault, Prob_Default]]
+    pd_score = MODEL.predict_proba(input_data_for_model)[0][1]
+
+    # Apply a simple business rule (e.g., PD > 10% is High Risk)
+    risk_level = "High Risk" if pd_score > 0.10 else "Low Risk"
+    
+    # Generate SHAP explanation (simulated here for brevity)
+    explanation = f"Loan Amount ({data.loan_amount}) was the largest contributor to risk."
+
+    return {
+        "risk_score": round(pd_score, 4), # Probability of Default
+        "risk_level": risk_level,
+        "credit_decision": "REJECT" if risk_level == "High Risk" else "APPROVE",
+        "explanation": explanation
+    }
