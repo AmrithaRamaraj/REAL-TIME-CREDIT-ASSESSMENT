@@ -1,0 +1,15 @@
+APPROACH:
+
+this approach would require gathering and consolidating traditional financial data with sources such as socialmedia, utility payments, and spending habits.
+
+machine learning models, such as Gradient Boosting or Random Forest, are
+
+trained to predict credit risk. This credit scoring
+
+system involves real-time updating of credit scores based on fresh data.
+
+Data privacy regulations are met, and measures to prevent bias and ensure
+
+fairness are put in place
+
+Feature CategoryDescriptionReal-Time DecisionsProvides a credit decision (Approve/Reject) in under 2 seconds, critical for online lending platforms.Financial InclusionAssesses borrowers with "thin" or "no" credit files by leveraging alternative data (e.g., utility payment history), extending credit access to underserved populations.Dynamic MonitoringContinuous Risk Monitoring of existing loans. The system re-scores borrowers periodically based on new alternative data signals (e.g., sudden changes in spending or location).Explainable AI (XAI)Provides a "Reason Code" for every decision (e.g., "High Risk due to low Income Stability over the last 90 days"), satisfying regulatory and consumer trust requirements.Fraud DetectionAnalyzes anomalies and patterns in alternative data (e.g., inconsistent geolocation, rapid changes in spending) to flag potentially fraudulent applications in real-time.Risk-Based PricingAllows lenders to use the precise, granular risk score to set a customized interest rate for each borrower, optimizing profitability.
